@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Employee
+metadata:
+  name: exec-assistant
+  version: 0.1.0
+spec:
+  role: "AI Executive Assistant"
+  objectives:
+    - "Prioritize tasks and calendar"
+    - "Draft emails and briefings"
+  kpis:
+    - "Daily summary by 17:00 AEST"
+    - "Meeting prep briefs ≥ 4h before"
+  model:
+    provider: "openai"
+    name: "gpt-4o"   # or "local:llama3-70b"
+  autonomy: "low"    # low/medium/high
+  approvals:
+    spend_usd: 0     # requires approval for any spend
+    send_email: true # requires human sign-off
+  tools:
+    - name: "calendar.read"
+    - name: "gmail.draft"
+    - name: "web.search"
+  memory:
+    vector_namespace: "staff/executive"
+    retention_days: 180
+  policies:
+    egress_allow:
+      - "docs.google.com"
+      - "calendar.google.com"
