@@ -9,6 +9,16 @@ spec:
     description: "AI-powered organizational management system"
     
   hierarchy:
+    overlord-layer:
+      level: 0
+      description: "Supreme AI Orchestration Layer"
+      members:
+        - name: agentic-overlord
+          role: "Master Orchestrator"
+          reports_to: human_oversight
+          direct_reports: ["all_agents"]
+          capabilities: ["supreme_decision_routing", "resource_optimization", "cross_agent_intelligence"]
+          
     executive-suite:
       level: 1
       description: "C-Level Executive Leadership"
@@ -26,6 +36,9 @@ spec:
             - quality-assurance
         - name: cfo-agent
           role: CFO
+          reports_to: ceo-agent
+        - name: document-analyst
+          role: "Document Analyst"
           reports_to: ceo-agent
           
     think-tank:

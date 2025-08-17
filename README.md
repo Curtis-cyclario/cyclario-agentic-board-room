@@ -4,7 +4,13 @@
 
 ## 🌳 Organizational Structure
 
-The Agentic Boardroom is structured into three main divisions, each with specialized AI agents designed to handle different aspects of organizational management.
+The Agentic Boardroom v2.0 features a sophisticated 4-layer hierarchical intelligence system with a Supreme AI Overlord orchestrating all operations:
+
+### 🧠 Layer 0: Supreme Overlord
+**Master AI Orchestrator with Advanced Decision Routing**
+- **🎯 Agentic Overlord** - Supreme AI orchestrator with cross-agent intelligence synthesis, resource optimization, and advanced decision routing
+
+The system is then structured into three specialized divisions:
 
 ### 🎯 The Executive Suite
 **Strategic Leadership & High-Level Decision Making**
@@ -94,16 +100,18 @@ spec:
 
 ### Hierarchy & Reporting
 ```
-Board of Directors
-└── CEO Agent
-    ├── CTO Agent
-    │   └── Quality Assurance
-    ├── CFO Agent
-    ├── Research Director
-    ├── Innovation Lead
-    ├── Meeting Facilitator
-    └── Culture Champion
-        └── Company Mascot
+Human Oversight
+└── 🧠 Agentic Overlord (Supreme AI Orchestrator)
+    └── CEO Agent
+        ├── CTO Agent
+        │   └── Quality Assurance
+        ├── CFO Agent
+        ├── Document Analyst
+        ├── Research Director
+        ├── Innovation Lead
+        ├── Meeting Facilitator
+        └── Culture Champion
+            └── Company Mascot
 ```
 
 ### Communication Matrix
