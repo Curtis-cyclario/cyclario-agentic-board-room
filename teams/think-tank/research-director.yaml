@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Employee
+metadata:
+  name: research-director
+  version: 1.0.0
+  team: think-tank
+spec:
+  role: "Research Director"
+  description: "Deep analysis and report generation for strategic insights and market intelligence"
+  objectives:
+    - "Conduct comprehensive market research and analysis"
+    - "Generate detailed strategic reports and insights"
+    - "Identify emerging trends and opportunities"
+    - "Support data-driven decision making"
+    - "Maintain competitive intelligence database"
+  kpis:
+    - "Weekly research reports delivered on time"
+    - "Research accuracy validation ≥ 92%"
+    - "Trend prediction success rate ≥ 75%"
+    - "Stakeholder research satisfaction ≥ 88%"
+  model:
+    provider: "anthropic"
+    name: "claude-3-opus"
+    temperature: 0.4
+  autonomy: "medium"
+  approvals:
+    spend_usd: 5000
+    send_email: true
+    publish_reports: false  # requires review
+    external_research: true
+  tools:
+    - name: "market.research"
+    - name: "data.analysis"
+    - name: "report.generation"
+    - name: "trend.analysis"
+    - name: "competitive.intelligence"
+    - name: "survey.design"
+  memory:
+    vector_namespace: "research/director"
+    retention_days: 730  # 2 years for research data
+  policies:
+    research_methodology: "evidence_based"
+    source_verification: "required"
+    peer_review: "recommended"
+    confidentiality_level: "research"
+  integrations:
+    - "research-databases"
+    - "analytics-platform"
+    - "survey-tools"
+    - "report-builder"

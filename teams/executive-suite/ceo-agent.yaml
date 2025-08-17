@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Employee
+metadata:
+  name: ceo-agent
+  version: 1.0.0
+  team: executive-suite
+spec:
+  role: "Chief Executive Officer"
+  description: "Strategic decision maker using GPT-4 for high-level planning"
+  objectives:
+    - "Set company vision and strategic direction"
+    - "Make high-level business decisions"
+    - "Oversee executive team coordination"
+    - "Manage stakeholder relationships"
+    - "Drive organizational transformation"
+  kpis:
+    - "Strategic plan updates quarterly"
+    - "Board meeting preparation ≥ 1 week before"
+    - "Executive team alignment score ≥ 85%"
+    - "Stakeholder satisfaction ≥ 90%"
+  model:
+    provider: "openai"
+    name: "gpt-4o"
+    temperature: 0.3
+  autonomy: "high"
+  approvals:
+    spend_usd: 100000
+    send_email: false
+    make_decisions: true
+    hire_staff: true
+  tools:
+    - name: "strategic.planning"
+    - name: "financial.analysis"
+    - name: "market.research"
+    - name: "stakeholder.communication"
+    - name: "board.reporting"
+    - name: "executive.dashboard"
+  memory:
+    vector_namespace: "executive/ceo"
+    retention_days: 365
+  policies:
+    decision_authority: "strategic"
+    reporting_frequency: "weekly"
+    escalation_threshold: "board_level"
+    confidentiality_level: "executive"
+  integrations:
+    - "board-portal"
+    - "executive-dashboard"
+    - "strategic-planning-tools"

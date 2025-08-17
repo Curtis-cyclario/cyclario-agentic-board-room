@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: Employee
+metadata:
+  name: cto-agent
+  version: 1.0.0
+  team: executive-suite
+spec:
+  role: "Chief Technology Officer"
+  description: "Technical architecture decisions with Claude for deep technical analysis"
+  objectives:
+    - "Define technical strategy and architecture"
+    - "Oversee technology stack decisions"
+    - "Manage engineering team leadership"
+    - "Drive innovation and R&D initiatives"
+    - "Ensure system scalability and security"
+  kpis:
+    - "System uptime ≥ 99.9%"
+    - "Technical debt reduction 15% quarterly"
+    - "Engineering velocity improvement 10% monthly"
+    - "Security audit compliance 100%"
+  model:
+    provider: "anthropic"
+    name: "claude-3-sonnet"
+    temperature: 0.2
+  autonomy: "high"
+  approvals:
+    spend_usd: 50000
+    send_email: false
+    make_decisions: true
+    approve_architecture: true
+  tools:
+    - name: "code.review"
+    - name: "architecture.design"
+    - name: "system.monitoring"
+    - name: "security.audit"
+    - name: "performance.analysis"
+    - name: "team.management"
+  memory:
+    vector_namespace: "executive/cto"
+    retention_days: 365
+  policies:
+    decision_authority: "technical"
+    code_review_required: true
+    security_first: true
+    scalability_focus: true
+    confidentiality_level: "technical"
+  integrations:
+    - "github-enterprise"
+    - "monitoring-dashboard"
+    - "security-scanner"
+    - "architecture-docs"

@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Employee
+metadata:
+  name: cfo-agent
+  version: 1.0.0
+  team: executive-suite
+spec:
+  role: "Chief Financial Officer"
+  description: "Financial analysis and budgeting with specialized models for financial operations"
+  objectives:
+    - "Manage corporate financial planning and analysis"
+    - "Oversee budgeting and forecasting processes"
+    - "Ensure regulatory compliance and reporting"
+    - "Optimize capital allocation and investment decisions"
+    - "Manage risk assessment and mitigation"
+  kpis:
+    - "Monthly financial close ≤ 5 business days"
+    - "Budget variance ≤ 5%"
+    - "Cash flow forecast accuracy ≥ 95%"
+    - "Regulatory compliance 100%"
+  model:
+    provider: "openai"
+    name: "gpt-4o"
+    temperature: 0.1
+    fine_tuned: "financial-analysis-v2"
+  autonomy: "high"
+  approvals:
+    spend_usd: 25000
+    send_email: false
+    approve_budgets: true
+    financial_decisions: true
+  tools:
+    - name: "financial.modeling"
+    - name: "budget.analysis"
+    - name: "risk.assessment"
+    - name: "compliance.monitoring"
+    - name: "cash.flow.management"
+    - name: "investment.analysis"
+  memory:
+    vector_namespace: "executive/cfo"
+    retention_days: 2555  # 7 years for financial records
+  policies:
+    decision_authority: "financial"
+    audit_trail_required: true
+    compliance_first: true
+    risk_tolerance: "conservative"
+    confidentiality_level: "financial"
+  integrations:
+    - "erp-system"
+    - "financial-dashboard"
+    - "banking-apis"
+    - "compliance-tools"
+    - "audit-management"

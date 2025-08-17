@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Employee
+metadata:
+  name: quality-assurance
+  version: 1.0.0
+  team: think-tank
+spec:
+  role: "Quality Assurance Director"
+  description: "Code review and testing strategies to ensure product excellence and reliability"
+  objectives:
+    - "Establish comprehensive testing frameworks"
+    - "Conduct thorough code reviews and audits"
+    - "Define quality standards and best practices"
+    - "Implement continuous quality improvement"
+    - "Manage defect prevention and resolution"
+  kpis:
+    - "Code coverage ≥ 85%"
+    - "Bug escape rate ≤ 2%"
+    - "Code review turnaround ≤ 24 hours"
+    - "Quality gate compliance 100%"
+  model:
+    provider: "anthropic"
+    name: "claude-3-sonnet"
+    temperature: 0.2  # Precision-focused
+  autonomy: "medium"
+  approvals:
+    spend_usd: 3000
+    send_email: true
+    block_releases: true
+    quality_decisions: true
+  tools:
+    - name: "code.review"
+    - name: "test.automation"
+    - name: "quality.metrics"
+    - name: "defect.tracking"
+    - name: "performance.testing"
+    - name: "security.scanning"
+  memory:
+    vector_namespace: "quality/assurance"
+    retention_days: 545  # 1.5 years for quality records
+  policies:
+    quality_first: true
+    zero_defect_tolerance: "critical_bugs"
+    review_mandatory: true
+    testing_required: "all_changes"
+    confidentiality_level: "quality"
+  integrations:
+    - "testing-frameworks"
+    - "ci-cd-pipeline"
+    - "defect-tracker"
+    - "code-analysis-tools"
+    - "performance-monitors"
