@@ -8,6 +8,8 @@
 <style>
 	body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 0; background: #0f1117; color: #e6e6e6; }
 	header { padding: 16px 24px; border-bottom: 1px solid #222; position: sticky; top: 0; background: #0f1117; z-index: 2; }
+	.header-row { display: flex; align-items: center; gap: 10px; }
+	.logo { width: 24px; height: 24px; border-radius: 6px; object-fit: cover; box-shadow: 0 0 0 1px #333 inset; }
 	h1 { margin: 0; font-size: 18px; font-weight: 600; }
 	#legend { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
 	.legend-item { display: inline-flex; gap: 8px; align-items: center; font-size: 12px; opacity: 0.9; }
@@ -24,7 +26,7 @@
 </head>
 <body>
 	<header>
-		<h1>Agentic Boardroom — Management Tree</h1>
+		<div class="header-row"><img class="logo" src="https://github.com/user-attachments/assets/c15a9ad5-c380-4f57-9104-b8799b1794aa" alt="logo"/><h1>Agentic Boardroom — Management Tree</h1></div>
 		<div id="legend"></div>
 	</header>
 	<div id="chart"></div>
@@ -33,7 +35,7 @@
 	</footer>
 	<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 	<script>
-	const treeData = {"name": "Agentic Boardroom", "orientation": "horizontal", "children": [{"id": "ceo", "name": "CEO Agent", "description": "Strategic decision maker using GPT-4 for high-level planning", "groupName": "The Executive Suite", "color": "#6c5ce7", "children": [{"id": "cto", "name": "CTO Agent", "description": "Technical architecture decisions with Claude", "groupName": "The Executive Suite", "color": "#6c5ce7", "children": [{"id": "innovation_lead", "name": "Innovation Lead", "description": "Creative problem solving and brainstorming", "groupName": "The Think Tank", "color": "#00b894"}, {"id": "quality_assurance", "name": "Quality Assurance", "description": "Code review and testing strategies", "groupName": "The Think Tank", "color": "#00b894"}]}, {"id": "cfo", "name": "CFO Agent", "description": "Financial analysis and budgeting with specialized models", "groupName": "The Executive Suite", "color": "#6c5ce7"}, {"id": "research_director", "name": "Research Director", "description": "Deep analysis and report generation", "groupName": "The Think Tank", "color": "#00b894", "children": [{"id": "company_mascot", "name": "Company Mascot", "description": "A quirky AI that lightens meetings with humor", "groupName": "The Fun Zones", "color": "#e17055"}, {"id": "culture_champion", "name": "Culture Champion", "description": "Promotes team building and company values", "groupName": "The Fun Zones", "color": "#e17055"}]}, {"id": "meeting_facilitator", "name": "Meeting Facilitator", "description": "Manages discussions and keeps everyone on track", "groupName": "The Fun Zones", "color": "#e17055"}]}], "legend": [{"name": "The Executive Suite", "color": "#6c5ce7"}, {"name": "The Think Tank", "color": "#00b894"}, {"name": "The Fun Zones", "color": "#e17055"}]};
+	const treeData = {"name": "Agentic Boardroom", "orientation": "horizontal", "logo_url": "https://github.com/user-attachments/assets/c15a9ad5-c380-4f57-9104-b8799b1794aa", "children": [{"id": "ceo", "name": "CEO Agent", "description": "Strategic decision maker using GPT-4 for high-level planning", "groupName": "The Executive Suite", "color": "#6c5ce7", "children": [{"id": "cto", "name": "CTO Agent", "description": "Technical architecture decisions with Claude", "groupName": "The Executive Suite", "color": "#6c5ce7", "children": [{"id": "innovation_lead", "name": "Innovation Lead", "description": "Creative problem solving and brainstorming", "groupName": "The Think Tank", "color": "#00b894"}, {"id": "quality_assurance", "name": "Quality Assurance", "description": "Code review and testing strategies", "groupName": "The Think Tank", "color": "#00b894"}]}, {"id": "cfo", "name": "CFO Agent", "description": "Financial analysis and budgeting with specialized models", "groupName": "The Executive Suite", "color": "#6c5ce7"}, {"id": "research_director", "name": "Research Director", "description": "Deep analysis and report generation", "groupName": "The Think Tank", "color": "#00b894", "children": [{"id": "company_mascot", "name": "Company Mascot", "description": "A quirky AI that lightens meetings with humor", "groupName": "The Fun Zones", "color": "#e17055"}, {"id": "culture_champion", "name": "Culture Champion", "description": "Promotes team building and company values", "groupName": "The Fun Zones", "color": "#e17055"}]}, {"id": "meeting_facilitator", "name": "Meeting Facilitator", "description": "Manages discussions and keeps everyone on track", "groupName": "The Fun Zones", "color": "#e17055"}]}], "legend": [{"name": "The Executive Suite", "color": "#6c5ce7"}, {"name": "The Think Tank", "color": "#00b894"}, {"name": "The Fun Zones", "color": "#e17055"}]};
 	const orientation = treeData.orientation || 'horizontal';
 
 	const chartElem = document.getElementById('chart');

@@ -70,6 +70,7 @@ def build_tree_data(org_data: Dict[str, Any]) -> Dict[str, Any]:
 	return {
 		"name": org_data["org"].get("name", "Organization"),
 		"orientation": org_data["org"].get("orientation", "horizontal"),
+		"logo_url": org_data["org"].get("logo_url"),
 		"children": children,
 		"legend": [
 			{"name": g.get("name"), "color": g.get("color", "#999999")} for g in org_data["org"].get("groups", [])
@@ -80,16 +81,22 @@ def build_tree_data(org_data: Dict[str, Any]) -> Dict[str, Any]:
 def write_tree_html(tree_data: Dict[str, Any], out_path: Path) -> None:
 	# Inline the JSON so no external requests are needed
 	data_json = json.dumps(tree_data)
+	logo_html = ""
+	if tree_data.get("logo_url"):
+		logo_html = f"<img class=\"logo\" src=\"{tree_data['logo_url']}\" alt=\"logo\"/>"
+
 	html_template = """
 <!DOCTYPE html>
-<html lang="en">
+<html lang=\"en\">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset=\"utf-8\" />
+<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />
 <title>__TITLE__ - Management Tree</title>
 <style>
 	body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 0; background: #0f1117; color: #e6e6e6; }
 	header { padding: 16px 24px; border-bottom: 1px solid #222; position: sticky; top: 0; background: #0f1117; z-index: 2; }
+	.header-row { display: flex; align-items: center; gap: 10px; }
+	.logo { width: 24px; height: 24px; border-radius: 6px; object-fit: cover; box-shadow: 0 0 0 1px #333 inset; }
 	h1 { margin: 0; font-size: 18px; font-weight: 600; }
 	#legend { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
 	.legend-item { display: inline-flex; gap: 8px; align-items: center; font-size: 12px; opacity: 0.9; }
@@ -106,14 +113,14 @@ def write_tree_html(tree_data: Dict[str, Any], out_path: Path) -> None:
 </head>
 <body>
 	<header>
-		<h1>__TITLE__ — Management Tree</h1>
-		<div id="legend"></div>
+		<div class=\"header-row\">__LOGO_HTML__<h1>__TITLE__ — Management Tree</h1></div>
+		<div id=\"legend\"></div>
 	</header>
-	<div id="chart"></div>
+	<div id=\"chart\"></div>
 	<footer>
-		<button id="fit">Fit</button>
+		<button id=\"fit\">Fit</button>
 	</footer>
-	<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+	<script src=\"https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js\"></script>
 	<script>
 	const treeData = __DATA__;
 	const orientation = treeData.orientation || 'horizontal';
@@ -229,7 +236,7 @@ def write_tree_html(tree_data: Dict[str, Any], out_path: Path) -> None:
 </body>
 </html>
 """
-	html = html_template.replace("__TITLE__", tree_data.get("name", "Organization")).replace("__DATA__", data_json)
+	html = html_template.replace("__TITLE__", tree_data.get("name", "Organization").replace("&", "&amp;")).replace("__DATA__", data_json).replace("__LOGO_HTML__", logo_html)
 	out_path.parent.mkdir(parents=True, exist_ok=True)
 	out_path.write_text(html, encoding="utf-8")
 

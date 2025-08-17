@@ -1,6 +1,7 @@
 org:
   name: Agentic Boardroom
   orientation: horizontal
+  logo_url: "https://github.com/user-attachments/assets/c15a9ad5-c380-4f57-9104-b8799b1794aa"
   groups:
     - id: executive_suite
       name: The Executive Suite
