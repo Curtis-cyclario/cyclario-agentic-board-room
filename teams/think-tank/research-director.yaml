@@ -19,9 +19,12 @@ spec:
     - "Trend prediction success rate ≥ 75%"
     - "Stakeholder research satisfaction ≥ 88%"
   model:
-    provider: "anthropic"
-    name: "claude-3-opus"
+    provider: "google_vertex"
+    name: "gemini-1.5-pro"
     temperature: 0.4
+    fallback:
+      provider: "anthropic"
+      name: "claude-3-opus"
   autonomy: "medium"
   approvals:
     spend_usd: 5000

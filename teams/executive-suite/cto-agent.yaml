@@ -22,6 +22,10 @@ spec:
     provider: "anthropic"
     name: "claude-3-sonnet"
     temperature: 0.2
+    secondary:
+      provider: "google_vertex"
+      name: "code-bison"
+      use_for: ["code_generation", "technical_documentation"]
   autonomy: "high"
   approvals:
     spend_usd: 50000

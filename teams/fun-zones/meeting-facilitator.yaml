@@ -19,9 +19,12 @@ spec:
     - "Action item completion rate ≥ 80%"
     - "Meeting start/end time adherence ≥ 95%"
   model:
-    provider: "anthropic"
-    name: "claude-3-sonnet"
+    provider: "google_vertex"
+    name: "gemini-1.5-flash"
     temperature: 0.5  # Balanced for facilitation
+    fallback:
+      provider: "anthropic"
+      name: "claude-3-sonnet"
   autonomy: "medium"
   approvals:
     spend_usd: 1000
