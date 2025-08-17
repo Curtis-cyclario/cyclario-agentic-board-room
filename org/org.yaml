@@ -1,0 +1,51 @@
+org:
+  name: Agentic Boardroom
+  orientation: horizontal
+  groups:
+    - id: executive_suite
+      name: The Executive Suite
+      color: "#6c5ce7"
+      roles:
+        - id: ceo
+          title: CEO Agent
+          description: Strategic decision maker using GPT-4 for high-level planning
+          reports_to: null
+        - id: cto
+          title: CTO Agent
+          description: Technical architecture decisions with Claude
+          reports_to: ceo
+        - id: cfo
+          title: CFO Agent
+          description: Financial analysis and budgeting with specialized models
+          reports_to: ceo
+    - id: think_tank
+      name: The Think Tank
+      color: "#00b894"
+      default_reports_to: ceo
+      roles:
+        - id: research_director
+          title: Research Director
+          description: Deep analysis and report generation
+        - id: innovation_lead
+          title: Innovation Lead
+          description: Creative problem solving and brainstorming
+          reports_to: cto
+        - id: quality_assurance
+          title: Quality Assurance
+          description: Code review and testing strategies
+          reports_to: cto
+    - id: fun_zones
+      name: The Fun Zones
+      color: "#e17055"
+      default_reports_to: research_director
+      roles:
+        - id: company_mascot
+          title: Company Mascot
+          description: A quirky AI that lightens meetings with humor
+        - id: meeting_facilitator
+          title: Meeting Facilitator
+          description: Manages discussions and keeps everyone on track
+          reports_to: ceo
+        - id: culture_champion
+          title: Culture Champion
+          description: Promotes team building and company values
