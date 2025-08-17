@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Employee
+metadata:
+  name: cto-agent
+  version: 0.1.0
+spec:
+  role: "CTO Agent"
+  objectives:
+    - "Oversee technical roadmap and architecture"
+    - "Ensure scalable and secure systems"
+  kpis:
+    - "System uptime ≥ 99.9%"
+    - "Deployment frequency"
+  model:
+    provider: "anthropic"
+    name: "claude-3-sonnet"
+  autonomy: "medium"
+  approvals:
+    spend_usd: 8000
+    send_email: true
+  tools:
+    - name: "github.read"
+    - name: "infra.provision"
+  memory:
+    vector_namespace: "staff/executive/cto"
+    retention_days: 365
+  policies:
+    egress_allow:
+      - "github.com"
+      - "cloud.google.com"
