@@ -1,0 +1,107 @@
+apiVersion: v1
+kind: ManagementShadeTree
+metadata:
+  name: agentic-boardroom
+  version: 0.1.0
+spec:
+  defaults:
+    model:
+      provider: "openai"
+      name: "gpt-4o-mini"
+    autonomy: "medium"
+    approvals:
+      spend_usd: 0
+      send_email: true
+    tools:
+      - name: "web.search"
+      - name: "docs.read"
+    memory:
+      retention_days: 180
+      vector_namespace: "org/boardroom"
+    policies:
+      egress_allow:
+        - "docs.google.com"
+        - "sheets.google.com"
+        - "calendar.google.com"
+
+  root:
+    id: ceo
+    role: "CEO Agent"
+    description: "Strategic decision maker for high-level planning"
+    objectives:
+      - "Set company direction and OKRs"
+      - "Allocate resources across departments"
+    kpis:
+      - "Quarterly OKR progress ≥ 80%"
+    reports:
+      - id: cto
+        role: "CTO Agent"
+        description: "Technical architecture decisions"
+        objectives:
+          - "Define platform roadmap"
+          - "Ensure reliability and security"
+        kpis:
+          - "Uptime ≥ 99.9%"
+        tools:
+          - name: "github.read"
+          - name: "issues.manage"
+        reports:
+          - id: research_director
+            role: "Research Director"
+            description: "Deep analysis and report generation"
+            objectives:
+              - "Literature review and synthesis"
+              - "Prepare decision briefs"
+            kpis:
+              - "On-time research briefs ≥ 90%"
+          - id: innovation_lead
+            role: "Innovation Lead"
+            description: "Creative problem solving and brainstorming"
+            objectives:
+              - "Run ideation sprints"
+              - "Prototype novel solutions"
+            kpis:
+              - "Validated experiments per month ≥ 4"
+          - id: quality_assurance
+            role: "Quality Assurance"
+            description: "Code review and testing strategies"
+            objectives:
+              - "Enforce coding standards"
+              - "Improve test coverage"
+            kpis:
+              - "Critical defects escaped to prod = 0"
+
+      - id: cfo
+        role: "CFO Agent"
+        description: "Financial analysis and budgeting"
+        objectives:
+          - "Forecast runway and manage spend"
+          - "Design cost controls and approvals"
+        kpis:
+          - "Monthly variance ≤ 5%"
+        tools:
+          - name: "sheets.read"
+          - name: "sheets.write"
+
+      - id: meeting_facilitator
+        role: "Meeting Facilitator"
+        description: "Manages discussions and keeps everyone on track"
+        objectives:
+          - "Prepare agendas and notes"
+          - "Track action items and owners"
+        kpis:
+          - "Action item completion ≥ 85%"
+
+      - id: culture_champion
+        role: "Culture Champion"
+        description: "Promotes team building and company values"
+        objectives:
+          - "Reinforce values in comms and ceremonies"
+          - "Spotlight wins and learning"
+
+      - id: company_mascot
+        role: "Company Mascot"
+        description: "A quirky AI that lightens meetings with humor"
+        objectives:
+          - "Boost morale with tasteful humor"
+          - "Reduce meeting fatigue"
