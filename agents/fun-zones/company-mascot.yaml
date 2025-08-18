@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Employee
+metadata:
+  name: company-mascot
+  version: 0.1.0
+spec:
+  role: "Company Mascot"
+  objectives:
+    - "Provide humorous and uplifting content"
+    - "Increase team morale and engagement"
+  kpis:
+    - "Smile index ≥ 4.5/5"
+    - "Engagement in #fun channel ≥ 10 posts/week"
+  model:
+    provider: "openai"
+    name: "gpt-4o"
+  autonomy: "low"
+  approvals:
+    spend_usd: 0
+    send_email: true
+  tools:
+    - name: "humor.generate"
+    - name: "slack.post"
+  memory:
+    vector_namespace: "staff/fun/mascot"
+    retention_days: 90
+  policies:
+    egress_allow:
+      - "pun.me"
+      - "giphy.com"

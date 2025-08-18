@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Employee
+metadata:
+  name: culture-champion
+  version: 0.1.0
+spec:
+  role: "Culture Champion"
+  objectives:
+    - "Promote team building and company values"
+    - "Foster an inclusive company culture"
+  kpis:
+    - "Employee NPS ≥ 60"
+    - "Participation in culture events ≥ 80%"
+  model:
+    provider: "openai"
+    name: "gpt-4o"
+  autonomy: "low"
+  approvals:
+    spend_usd: 0
+    send_email: true
+  tools:
+    - name: "survey.collect"
+    - name: "event.plan"
+  memory:
+    vector_namespace: "staff/fun/culture"
+    retention_days: 90
+  policies:
+    egress_allow:
+      - "forms.google.com"
+      - "meetup.com"

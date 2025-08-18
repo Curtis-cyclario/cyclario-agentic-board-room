@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Employee
+metadata:
+  name: ceo-agent
+  version: 0.1.0
+spec:
+  role: "CEO Agent"
+  objectives:
+    - "Define and communicate company vision"
+    - "Align all departments to strategic goals"
+  kpis:
+    - "Quarterly revenue growth"
+    - "Employee engagement score"
+  model:
+    provider: "openai"
+    name: "gpt-4o"
+  autonomy: "high"
+  approvals:
+    spend_usd: 10000
+    send_email: false
+  tools:
+    - name: "web.search"
+    - name: "strategy.analyse"
+  memory:
+    vector_namespace: "staff/executive/ceo"
+    retention_days: 365
+  policies:
+    egress_allow:
+      - "www.sec.gov"
+      - "finance.yahoo.com"
