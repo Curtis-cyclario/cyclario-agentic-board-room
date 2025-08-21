@@ -47,9 +47,10 @@ class AgenticBoardroomServer {
         directives: {
           defaultSrc: ["'self'"],
           styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.tailwindcss.com", "https://cdnjs.cloudflare.com"],
-          scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.tailwindcss.com", "https://unpkg.com", "https://cdn.jsdelivr.net"],
+          scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.tailwindcss.com", "https://unpkg.com", "https://cdn.jsdelivr.net", "https://cdn.socket.io"],
           imgSrc: ["'self'", "data:", "https:"],
-          fontSrc: ["'self'", "https://cdnjs.cloudflare.com"]
+          fontSrc: ["'self'", "https://cdnjs.cloudflare.com"],
+          connectSrc: ["'self'", "ws://localhost:" + (process.env.PORT || 3000), "wss://localhost:" + (process.env.PORT || 3000)]
         }
       }
     }));
@@ -73,7 +74,7 @@ class AgenticBoardroomServer {
       res.json({
         status: 'healthy',
         timestamp: new Date().toISOString(),
-        version: '2.0.0',
+        version: '3.0.0',
         system: 'agentic-boardroom',
         uptime: process.uptime()
       });
@@ -224,7 +225,7 @@ class AgenticBoardroomServer {
         success: true,
         system: {
           status: 'operational',
-          version: '2.0.0',
+          version: '3.0.0',
           uptime: process.uptime(),
           memory: process.memoryUsage(),
           timestamp: new Date().toISOString()

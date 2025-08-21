@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏢 Agentic Boardroom - AI Organizational Dashboard</title>
+    <title>🏢 Agentic Boardroom v3 - AI Organizational Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
@@ -39,7 +41,7 @@
         </header>
 
         <!-- Main Content -->
-        <div class="container mx-auto px-6 py-8">
+        <div class="container mx-auto px-6 py-8" x-init="init()">
             <!-- Quick Stats -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <div class="bg-white rounded-lg card-shadow p-6">
@@ -250,6 +252,11 @@
                         <div class="bg-gray-50 p-3 rounded">Team meeting facilitation - Pending</div>
                     </div>
                 </div>
+                <div class="mt-6 flex justify-end">
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg" @click="startChat(selectedAgent.id)">
+                        Start Chat
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -257,6 +264,14 @@
     <script>
         function dashboardApp() {
             return {
+                apiBase: '',
+                token: localStorage.getItem('ab_token') || '',
+                sessionId: localStorage.getItem('ab_session') || '',
+                socket: null,
+                user: null,
+                searchQuery: '',
+                allAgents: [],
+                fuse: null,
                 selectedAgent: null,
                 stats: {
                     activeAgents: 10,
@@ -264,35 +279,93 @@
                     costEfficiency: '$3.20',
                     satisfaction: '94%'
                 },
-                agents: {
-                    executive: [
-                        { id: 1, name: 'CEO Agent', role: 'Strategic Leadership', status: 'active', load: 75, model: 'GPT-4', autonomy: 'High' },
-                        { id: 2, name: 'CTO Agent', role: 'Technical Architecture', status: 'active', load: 68, model: 'Claude Sonnet', autonomy: 'High' },
-                        { id: 3, name: 'CFO Agent', role: 'Financial Management', status: 'active', load: 82, model: 'GPT-4', autonomy: 'High' },
-                        { id: 4, name: 'Document Analyst', role: 'Information Processing', status: 'active', load: 45, model: 'Gemini Pro', autonomy: 'Medium' }
-                    ],
-                    thinkTank: [
-                        { id: 5, name: 'Research Director', role: 'Market Intelligence', status: 'active', load: 60, model: 'Gemini Pro', autonomy: 'Medium' },
-                        { id: 6, name: 'Innovation Lead', role: 'Creative Solutions', status: 'active', load: 55, model: 'GPT-4', autonomy: 'Medium' },
-                        { id: 7, name: 'Quality Assurance', role: 'Excellence Enforcement', status: 'active', load: 72, model: 'Claude Sonnet', autonomy: 'Medium' }
-                    ],
-                    funZones: [
-                        { id: 8, name: 'Meeting Facilitator', role: 'Coordination', status: 'active', load: 40, model: 'Gemini Flash', autonomy: 'Medium' },
-                        { id: 9, name: 'Culture Champion', role: 'Engagement', status: 'active', load: 35, model: 'Claude Opus', autonomy: 'Medium' },
-                        { id: 10, name: 'Company Mascot', role: 'Morale Boost', status: 'active', load: 20, model: 'GPT-4', autonomy: 'Low' }
-                    ]
-                },
+                agents: { executive: [], thinkTank: [], funZones: [] },
                 selectAgent(agent) {
                     this.selectedAgent = agent;
                 },
                 init() {
-                    // Initialize real-time updates
-                    setInterval(() => {
-                        this.updateStats();
-                    }, 5000);
+                    this.apiBase = `${location.origin}`;
+                    if (!this.token) {
+                        this.quickLogin();
+                    } else {
+                        this.bootstrap();
+                    }
+                },
+                async quickLogin() {
+                    try {
+                        const res = await fetch(`${this.apiBase}/api/auth/login`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: 'admin@agentic-boardroom.com', password: 'admin123' })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            this.token = data.token;
+                            this.sessionId = data.sessionId;
+                            localStorage.setItem('ab_token', this.token);
+                            localStorage.setItem('ab_session', this.sessionId);
+                            this.user = data.user;
+                            this.bootstrap();
+                        }
+                    } catch (e) { console.error(e); }
+                },
+                async bootstrap() {
+                    await this.fetchAgents();
+                    this.setupSocket();
+                    setInterval(() => this.updateStats(), 5000);
+                },
+                async fetchAgents() {
+                    try {
+                        const res = await fetch(`${this.apiBase}/api/system/agents/status`, {
+                            headers: { 'Authorization': `Bearer ${this.token}` }
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            const mapped = Object.entries(data.agents).map(([id, a]) => ({
+                                id,
+                                name: a.name,
+                                role: a.title,
+                                status: a.status,
+                                load: a.load,
+                                model: a.model,
+                                autonomy: 'Adaptive'
+                            }));
+                            this.allAgents = mapped;
+                            this.fuse = new Fuse(mapped, { keys: ['name', 'role'], threshold: 0.35 });
+                            this.agents = this.groupAgents(mapped);
+                        }
+                    } catch (e) { console.error(e); }
+                },
+                groupAgents(list) {
+                    return {
+                        executive: list.filter(x => /CEO|CTO|CFO|Document/i.test(x.name)),
+                        thinkTank: list.filter(x => /Research|Innovation|Quality/i.test(x.name)),
+                        funZones: list.filter(x => /Meeting|Culture|Mascot/i.test(x.name))
+                    };
+                },
+                applySearch() {
+                    if (!this.fuse || !this.searchQuery.trim()) {
+                        this.agents = this.groupAgents(this.allAgents);
+                        return;
+                    }
+                    const results = this.fuse.search(this.searchQuery.trim()).map(r => r.item);
+                    this.agents = this.groupAgents(results);
+                },
+                setupSocket() {
+                    try {
+                        this.socket = io(this.apiBase, { transports: ['websocket'] });
+                        this.socket.on('connect', () => {
+                            this.socket.emit('authenticate', this.token);
+                        });
+                        this.socket.on('authenticated', () => {});
+                        this.socket.on('realtime:update', (payload) => {
+                            if (payload?.type === 'newMessage') {
+                                // Placeholder for chat UI updates
+                            }
+                        });
+                    } catch (e) { console.error(e); }
                 },
                 updateStats() {
-                    // Simulate real-time updates
                     this.stats.tasksCompleted += Math.floor(Math.random() * 5);
                 }
             }

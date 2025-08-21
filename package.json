@@ -1,6 +1,6 @@
 {
   "name": "agentic-boardroom",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "🏢 AI-powered organizational management system with sophisticated agent hierarchies - architecting sustainable systems to elevate humanity",
   "keywords": [
     "ai",
@@ -33,7 +33,7 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "build": "npm run build:ui && npm run build:docs",
-    "build:ui": "cd ui && npm install && npm run build",
+    "build:ui": "echo Skipping UI build: static dashboard served directly",
     "build:docs": "jsdoc -c jsdoc.json",
     "test": "jest --coverage",
     "test:watch": "jest --watch",

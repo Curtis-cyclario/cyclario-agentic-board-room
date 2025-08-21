@@ -536,16 +536,17 @@ class AgentChatSystem extends EventEmitter {
   /**
    * Register WebSocket connection for real-time updates
    */
-  registerConnection(userId, websocket) {
+  registerConnection(userId, socket) {
     if (!this.activeConnections.has(userId)) {
       this.activeConnections.set(userId, new Set());
     }
-    this.activeConnections.get(userId).add(websocket);
+    this.activeConnections.get(userId).add(socket);
 
-    websocket.on('close', () => {
+    // For socket.io, listen to 'disconnect'
+    socket.on('disconnect', () => {
       const userConnections = this.activeConnections.get(userId);
       if (userConnections) {
-        userConnections.delete(websocket);
+        userConnections.delete(socket);
         if (userConnections.size === 0) {
           this.activeConnections.delete(userId);
         }
@@ -559,10 +560,9 @@ class AgentChatSystem extends EventEmitter {
   broadcastToUser(userId, message) {
     const userConnections = this.activeConnections.get(userId);
     if (userConnections) {
-      for (const websocket of userConnections) {
-        if (websocket.readyState === 1) { // WebSocket.OPEN
-          websocket.send(JSON.stringify(message));
-        }
+      for (const socket of userConnections) {
+        // socket.io: emit a namespaced event
+        socket.emit('realtime:update', message);
       }
     }
   }
