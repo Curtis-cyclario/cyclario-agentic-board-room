@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏢 Agentic Boardroom - AI Organizational Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .card-shadow { box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .agent-card { transition: all 0.3s ease; }
+        .agent-card:hover { transform: translateY(-5px); }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div x-data="dashboardApp()" class="min-h-screen">
+        <!-- Header -->
+        <header class="gradient-bg text-white shadow-lg">
+            <div class="container mx-auto px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <h1 class="text-3xl font-bold">🏢 Agentic Boardroom</h1>
+                        <span class="bg-green-500 text-xs px-2 py-1 rounded-full">LIVE</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-right">
+                            <p class="text-sm opacity-75">System Health</p>
+                            <p class="font-bold text-green-300">99.9% Uptime</p>
+                        </div>
+                        <button class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="container mx-auto px-6 py-8">
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-lg card-shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Active Agents</p>
+                            <p class="text-3xl font-bold text-blue-600" x-text="stats.activeAgents">10</p>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <i class="fas fa-robot text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg card-shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Tasks Completed</p>
+                            <p class="text-3xl font-bold text-green-600" x-text="stats.tasksCompleted">1,247</p>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg card-shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Cost Efficiency</p>
+                            <p class="text-3xl font-bold text-purple-600" x-text="stats.costEfficiency">$3.20</p>
+                        </div>
+                        <div class="bg-purple-100 p-3 rounded-full">
+                            <i class="fas fa-dollar-sign text-purple-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg card-shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Satisfaction</p>
+                            <p class="text-3xl font-bold text-orange-600" x-text="stats.satisfaction">94%</p>
+                        </div>
+                        <div class="bg-orange-100 p-3 rounded-full">
+                            <i class="fas fa-heart text-orange-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agent Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                <!-- Executive Suite -->
+                <div class="bg-white rounded-lg card-shadow p-6">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">🎯 Executive Suite</h3>
+                    <div class="space-y-4">
+                        <template x-for="agent in agents.executive" :key="agent.id">
+                            <div class="agent-card bg-blue-50 p-4 rounded-lg border border-blue-200 cursor-pointer" 
+                                 @click="selectAgent(agent)">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800" x-text="agent.name"></h4>
+                                        <p class="text-sm text-gray-600" x-text="agent.role"></p>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <div :class="agent.status === 'active' ? 'bg-green-500' : 'bg-gray-400'" 
+                                             class="w-3 h-3 rounded-full"></div>
+                                        <span class="text-xs text-gray-500" x-text="agent.load + '%'"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Think Tank -->
+                <div class="bg-white rounded-lg card-shadow p-6">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">🧠 Think Tank</h3>
+                    <div class="space-y-4">
+                        <template x-for="agent in agents.thinkTank" :key="agent.id">
+                            <div class="agent-card bg-purple-50 p-4 rounded-lg border border-purple-200 cursor-pointer"
+                                 @click="selectAgent(agent)">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800" x-text="agent.name"></h4>
+                                        <p class="text-sm text-gray-600" x-text="agent.role"></p>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <div :class="agent.status === 'active' ? 'bg-green-500' : 'bg-gray-400'" 
+                                             class="w-3 h-3 rounded-full"></div>
+                                        <span class="text-xs text-gray-500" x-text="agent.load + '%'"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Fun Zones -->
+                <div class="bg-white rounded-lg card-shadow p-6">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">🎪 Fun Zones</h3>
+                    <div class="space-y-4">
+                        <template x-for="agent in agents.funZones" :key="agent.id">
+                            <div class="agent-card bg-orange-50 p-4 rounded-lg border border-orange-200 cursor-pointer"
+                                 @click="selectAgent(agent)">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800" x-text="agent.name"></h4>
+                                        <p class="text-sm text-gray-600" x-text="agent.role"></p>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <div :class="agent.status === 'active' ? 'bg-green-500' : 'bg-gray-400'" 
+                                             class="w-3 h-3 rounded-full"></div>
+                                        <span class="text-xs text-gray-500" x-text="agent.load + '%'"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Master Overlord Status -->
+            <div class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg card-shadow p-8 mb-8 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2">🧠 Master Overlord Status</h3>
+                        <p class="opacity-90">Supreme AI Orchestrator managing all operations</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-3xl font-bold">95.7%</p>
+                        <p class="opacity-75">Efficiency Score</p>
+                    </div>
+                </div>
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                        <p class="text-sm opacity-75">Decisions/Hour</p>
+                        <p class="text-2xl font-bold">2,847</p>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                        <p class="text-sm opacity-75">Conflicts Resolved</p>
+                        <p class="text-2xl font-bold">23</p>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-lg p-4">
+                        <p class="text-sm opacity-75">Cost Optimization</p>
+                        <p class="text-2xl font-bold">87%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-lg card-shadow p-6">
+                <h3 class="text-xl font-bold mb-4 text-gray-800">⚡ Quick Actions</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-lg transition">
+                        <i class="fas fa-plus mb-2"></i>
+                        <p class="text-sm">New Task</p>
+                    </button>
+                    <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-lg transition">
+                        <i class="fas fa-chart-bar mb-2"></i>
+                        <p class="text-sm">Analytics</p>
+                    </button>
+                    <button class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-lg transition">
+                        <i class="fas fa-cogs mb-2"></i>
+                        <p class="text-sm">Settings</p>
+                    </button>
+                    <button class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-lg transition">
+                        <i class="fas fa-question-circle mb-2"></i>
+                        <p class="text-sm">Help</p>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Agent Detail Modal -->
+        <div x-show="selectedAgent" x-transition class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold" x-text="selectedAgent?.name"></h2>
+                    <button @click="selectedAgent = null" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold mb-2">Status</h4>
+                        <p class="text-gray-600" x-text="selectedAgent?.status"></p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-2">Current Load</h4>
+                        <p class="text-gray-600" x-text="selectedAgent?.load + '%'"></p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-2">Model</h4>
+                        <p class="text-gray-600" x-text="selectedAgent?.model"></p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-2">Autonomy</h4>
+                        <p class="text-gray-600" x-text="selectedAgent?.autonomy"></p>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <h4 class="font-semibold mb-2">Recent Tasks</h4>
+                    <div class="space-y-2">
+                        <div class="bg-gray-50 p-3 rounded">Strategic planning review - Completed</div>
+                        <div class="bg-gray-50 p-3 rounded">Budget analysis - In Progress</div>
+                        <div class="bg-gray-50 p-3 rounded">Team meeting facilitation - Pending</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function dashboardApp() {
+            return {
+                selectedAgent: null,
+                stats: {
+                    activeAgents: 10,
+                    tasksCompleted: 1247,
+                    costEfficiency: '$3.20',
+                    satisfaction: '94%'
+                },
+                agents: {
+                    executive: [
+                        { id: 1, name: 'CEO Agent', role: 'Strategic Leadership', status: 'active', load: 75, model: 'GPT-4', autonomy: 'High' },
+                        { id: 2, name: 'CTO Agent', role: 'Technical Architecture', status: 'active', load: 68, model: 'Claude Sonnet', autonomy: 'High' },
+                        { id: 3, name: 'CFO Agent', role: 'Financial Management', status: 'active', load: 82, model: 'GPT-4', autonomy: 'High' },
+                        { id: 4, name: 'Document Analyst', role: 'Information Processing', status: 'active', load: 45, model: 'Gemini Pro', autonomy: 'Medium' }
+                    ],
+                    thinkTank: [
+                        { id: 5, name: 'Research Director', role: 'Market Intelligence', status: 'active', load: 60, model: 'Gemini Pro', autonomy: 'Medium' },
+                        { id: 6, name: 'Innovation Lead', role: 'Creative Solutions', status: 'active', load: 55, model: 'GPT-4', autonomy: 'Medium' },
+                        { id: 7, name: 'Quality Assurance', role: 'Excellence Enforcement', status: 'active', load: 72, model: 'Claude Sonnet', autonomy: 'Medium' }
+                    ],
+                    funZones: [
+                        { id: 8, name: 'Meeting Facilitator', role: 'Coordination', status: 'active', load: 40, model: 'Gemini Flash', autonomy: 'Medium' },
+                        { id: 9, name: 'Culture Champion', role: 'Engagement', status: 'active', load: 35, model: 'Claude Opus', autonomy: 'Medium' },
+                        { id: 10, name: 'Company Mascot', role: 'Morale Boost', status: 'active', load: 20, model: 'GPT-4', autonomy: 'Low' }
+                    ]
+                },
+                selectAgent(agent) {
+                    this.selectedAgent = agent;
+                },
+                init() {
+                    // Initialize real-time updates
+                    setInterval(() => {
+                        this.updateStats();
+                    }, 5000);
+                },
+                updateStats() {
+                    // Simulate real-time updates
+                    this.stats.tasksCompleted += Math.floor(Math.random() * 5);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

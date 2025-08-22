@@ -1,0 +1,228 @@
+# 🏢 Agentic Boardroom - Git Ignore Configuration
+# Comprehensive ignore patterns for AI-powered organizational management system
+
+# Environment and Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.key
+*.pem
+*.p12
+secrets/
+credentials/
+
+# Node.js Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build Outputs
+dist/
+build/
+out/
+coverage/
+.nyc_output/
+*.tgz
+*.tar.gz
+
+# Runtime Files
+*.pid
+*.seed
+*.pid.lock
+.DS_Store
+Thumbs.db
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.classpath
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+test-results/
+
+# Temporary Files
+tmp/
+temp/
+.tmp/
+.cache/
+.parcel-cache/
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+terraform.tfvars
+terraform.tfvars.json
+
+# Kubernetes
+kubeconfig
+*.kubeconfig
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# AI Model Artifacts
+models/
+checkpoints/
+*.h5
+*.pkl
+*.joblib
+
+# Data Files
+data/
+datasets/
+*.csv
+*.json.backup
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup Files
+*.backup
+*.bak
+*.old
+*.orig
+
+# Documentation Build
+docs/_build/
+docs/build/
+site/
+
+# Package Manager Files
+package-lock.json.backup
+yarn.lock.backup
+
+# Runtime Configuration
+config/local.json
+config/production.json
+
+# Certificate Files
+*.crt
+*.cert
+*.ca-bundle
+
+# Monitoring and Metrics
+metrics/
+prometheus-data/
+grafana-data/
+
+# CI/CD Artifacts
+.github/workflows/secrets/
+.circleci/
+.travis.yml.backup
+
+# Local Development
+local/
+sandbox/
+playground/
+
+# Agent Runtime Data
+agent-logs/
+agent-state/
+agent-memory/
+
+# Overlord System Data
+overlord-state/
+decision-cache/
+routing-cache/
+
+# UI Build Artifacts
+ui/dist/
+ui/build/
+ui/node_modules/
+ui/.next/
+ui/.nuxt/
+ui/.vuepress/dist/
+
+# Infrastructure State
+infrastructure/.terraform/
+infrastructure/terraform.tfstate*
+infrastructure/*.tfvars
+
+# Automation Artifacts
+automation/logs/
+automation/state/
+
+# QA and Testing
+qa-rnd/reports/
+qa-rnd/artifacts/
+test-reports/
+performance-reports/
+
+# Feedback System Data
+feedback-data/
+analytics-data/
+metrics-data/
+
+# Sustainability Reports
+carbon-reports/
+sustainability-data/
+energy-metrics/
+
+# Deployment Artifacts
+deployments/staging/
+deployments/production/
+deployment-logs/
+
+# Schema Validation
+schema-validation-cache/
+
+# Policy Enforcement
+policy-violations/
+audit-logs/
+
+# Configuration Overrides
+configs/local/
+configs/override/
+configs/*.local.yaml
+
+# Scripts Runtime
+scripts/logs/
+scripts/cache/
+scripts/.pid
+
+# Package Distribution
+*.tgz
+agentic-boardroom-*.tar.gz
+release/
+
+# Miscellaneous
+*.orig
+*.rej
+.sass-cache/
+connect.lock
+typings/
+.eslintcache
+.stylelintcache

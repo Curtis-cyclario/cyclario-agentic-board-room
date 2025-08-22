@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: ModelProviders
+metadata:
+  name: agentic-boardroom-models
+  version: 1.0.0
+spec:
+  providers:
+    openai:
+      name: "OpenAI"
+      api_base: "https://api.openai.com/v1"
+      models:
+        - name: "gpt-4o"
+          type: "chat"
+          context_window: 128000
+          best_for: ["strategic_planning", "creative_tasks", "general_reasoning"]
+        - name: "gpt-4o-mini"
+          type: "chat"
+          context_window: 128000
+          cost_tier: "low"
+          best_for: ["quick_tasks", "routine_operations"]
+      authentication:
+        type: "api_key"
+        header: "Authorization"
+        prefix: "Bearer"
+        
+    anthropic:
+      name: "Anthropic"
+      api_base: "https://api.anthropic.com"
+      models:
+        - name: "claude-3-opus"
+          type: "chat"
+          context_window: 200000
+          best_for: ["complex_analysis", "research", "detailed_reasoning"]
+        - name: "claude-3-sonnet"
+          type: "chat"
+          context_window: 200000
+          best_for: ["technical_analysis", "code_review", "balanced_tasks"]
+        - name: "claude-3-haiku"
+          type: "chat"
+          context_window: 200000
+          cost_tier: "low"
+          best_for: ["quick_responses", "simple_tasks"]
+      authentication:
+        type: "api_key"
+        header: "x-api-key"
+        
+    google_vertex:
+      name: "Google Vertex AI"
+      api_base: "https://us-central1-aiplatform.googleapis.com/v1"
+      project_id: "${GOOGLE_CLOUD_PROJECT}"
+      location: "us-central1"
+      models:
+        - name: "gemini-1.5-pro"
+          type: "chat"
+          context_window: 2000000
+          best_for: ["long_context_analysis", "document_processing", "multimodal_tasks"]
+        - name: "gemini-1.5-flash"
+          type: "chat"
+          context_window: 1000000
+          cost_tier: "low"
+          best_for: ["fast_responses", "high_throughput", "real_time_tasks"]
+        - name: "text-bison"
+          type: "text_generation"
+          context_window: 8192
+          best_for: ["text_generation", "summarization"]
+        - name: "code-bison"
+          type: "code_generation"
+          context_window: 6144
+          best_for: ["code_generation", "code_explanation"]
+      authentication:
+        type: "service_account"
+        credentials_path: "${GOOGLE_APPLICATION_CREDENTIALS}"
+        api_key: "${GOOGLE_API_KEY}"
+        
+  model_selection_strategy:
+    cost_optimization: true
+    performance_priority: "balanced"  # low_cost | balanced | high_performance
+    fallback_enabled: true
+    
+  cost_management:
+    budget_alerts:
+      daily_limit: 100.00
+      monthly_limit: 2000.00
+      currency: "USD"
+    cost_tracking:
+      enabled: true
+      granularity: "agent_level"
+      
+  performance_monitoring:
+    latency_tracking: true
+    token_usage_tracking: true
+    error_rate_monitoring: true
+    
+  environment_variables:
+    required:
+      - OPENAI_API_KEY
+      - ANTHROPIC_API_KEY
+      - GOOGLE_API_KEY
+      - GOOGLE_CLOUD_PROJECT
+    optional:
+      - GOOGLE_APPLICATION_CREDENTIALS
