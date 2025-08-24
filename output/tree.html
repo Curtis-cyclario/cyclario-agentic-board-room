@@ -1,0 +1,150 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Agentic Boardroom - Management Tree</title>
+<style>
+	body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 0; background: #0f1117; color: #e6e6e6; }
+	header { padding: 16px 24px; border-bottom: 1px solid #222; position: sticky; top: 0; background: #0f1117; z-index: 2; }
+	.header-row { display: flex; align-items: center; gap: 10px; }
+	.logo { width: 24px; height: 24px; border-radius: 6px; object-fit: cover; box-shadow: 0 0 0 1px #333 inset; }
+	h1 { margin: 0; font-size: 18px; font-weight: 600; }
+	#legend { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+	.legend-item { display: inline-flex; gap: 8px; align-items: center; font-size: 12px; opacity: 0.9; }
+	.legend-swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+	#chart { width: 100%; height: calc(100vh - 80px); }
+	.node rect { rx: 8px; ry: 8px; }
+	.node text.title { font-size: 12px; font-weight: 600; fill: #f0f0f0; }
+	.node text.subtitle { font-size: 11px; fill: #c9c9c9; }
+	.link { fill: none; stroke: #666; stroke-width: 1.25px; opacity: 0.75; }
+	footer { position: fixed; right: 12px; bottom: 10px; font-size: 11px; opacity: 0.7; }
+	button { background: #1f2430; color: #e6e6e6; border: 1px solid #333; border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+	button:hover { border-color: #555; }
+</style>
+</head>
+<body>
+	<header>
+		<div class="header-row"><img class="logo" src="https://github.com/user-attachments/assets/c15a9ad5-c380-4f57-9104-b8799b1794aa" alt="logo"/><h1>Agentic Boardroom — Management Tree</h1></div>
+		<div id="legend"></div>
+	</header>
+	<div id="chart"></div>
+	<footer>
+		<button id="fit">Fit</button>
+	</footer>
+	<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+	<script>
+	const treeData = {"name": "Agentic Boardroom", "orientation": "horizontal", "logo_url": "https://github.com/user-attachments/assets/c15a9ad5-c380-4f57-9104-b8799b1794aa", "children": [{"id": "ceo", "name": "CEO Agent", "description": "Strategic decision maker using GPT-4 for high-level planning", "groupName": "The Executive Suite", "color": "#6c5ce7", "children": [{"id": "cto", "name": "CTO Agent", "description": "Technical architecture decisions with Claude", "groupName": "The Executive Suite", "color": "#6c5ce7", "children": [{"id": "innovation_lead", "name": "Innovation Lead", "description": "Creative problem solving and brainstorming", "groupName": "The Think Tank", "color": "#00b894"}, {"id": "quality_assurance", "name": "Quality Assurance", "description": "Code review and testing strategies", "groupName": "The Think Tank", "color": "#00b894"}]}, {"id": "cfo", "name": "CFO Agent", "description": "Financial analysis and budgeting with specialized models", "groupName": "The Executive Suite", "color": "#6c5ce7"}, {"id": "research_director", "name": "Research Director", "description": "Deep analysis and report generation", "groupName": "The Think Tank", "color": "#00b894", "children": [{"id": "company_mascot", "name": "Company Mascot", "description": "A quirky AI that lightens meetings with humor", "groupName": "The Fun Zones", "color": "#e17055"}, {"id": "culture_champion", "name": "Culture Champion", "description": "Promotes team building and company values", "groupName": "The Fun Zones", "color": "#e17055"}]}, {"id": "meeting_facilitator", "name": "Meeting Facilitator", "description": "Manages discussions and keeps everyone on track", "groupName": "The Fun Zones", "color": "#e17055"}]}], "legend": [{"name": "The Executive Suite", "color": "#6c5ce7"}, {"name": "The Think Tank", "color": "#00b894"}, {"name": "The Fun Zones", "color": "#e17055"}]};
+	const orientation = treeData.orientation || 'horizontal';
+
+	const chartElem = document.getElementById('chart');
+	const width = chartElem.clientWidth;
+	const height = chartElem.clientHeight;
+
+	const svg = d3.select('#chart').append('svg')
+		.attr('width', width)
+		.attr('height', height)
+		.style('background', '#0f1117');
+
+	const g = svg.append('g').attr('transform', 'translate(40,40)');
+
+	const root = d3.hierarchy({ name: treeData.name, children: treeData.children })
+		.sum(d => 1)
+		.sort((a,b) => d3.ascending(a.data.name, b.data.name));
+
+	const nodeWidth = 180;
+	const nodeHeight = 56;
+	const nodeGapX = 36;
+	const nodeGapY = 24;
+
+	const treeLayout = d3.tree().nodeSize(
+		orientation === 'horizontal' ? [nodeHeight + nodeGapY, nodeWidth + nodeGapX] : [nodeWidth + nodeGapX, nodeHeight + nodeGapY]
+	);
+	treeLayout(root);
+
+	// Centering/fit helpers
+	function fitToViewBox() {
+		const bbox = g.node().getBBox();
+		const margin = 40;
+		const vb = [bbox.x - margin, bbox.y - margin, bbox.width + 2*margin, bbox.height + 2*margin];
+		svg.attr('viewBox', vb.join(' '));
+	}
+	fitToViewBox();
+	document.getElementById('fit').onclick = fitToViewBox;
+
+	const diagonal = d3.linkHorizontal()
+		.x(d => d.y)
+		.y(d => d.x);
+
+	// Links
+	g.selectAll('path.link')
+		.data(root.links())
+		.enter()
+		.append('path')
+		.attr('class', 'link')
+		.attr('d', diagonal)
+		.attr('stroke', '#3a3f4b');
+
+	// Nodes
+	const node = g.selectAll('g.node')
+		.data(root.descendants())
+		.enter()
+		.append('g')
+		.attr('class', 'node')
+		.attr('transform', d => `translate(${d.y},${d.x})`);
+
+	node.append('rect')
+		.attr('x', -nodeWidth/2)
+		.attr('y', -nodeHeight/2)
+		.attr('width', nodeWidth)
+		.attr('height', nodeHeight)
+		.attr('fill', d => d.data.color || '#2b2f3a')
+		.attr('stroke', '#1d1f27')
+		.attr('stroke-width', 1.25)
+		.attr('opacity', d => d.depth === 0 ? 0.15 : 0.9);
+
+	node.append('text')
+		.attr('class', 'title')
+		.attr('text-anchor', 'middle')
+		.attr('dy', '-0.25em')
+		.text(d => d.depth === 0 ? treeData.name : (d.data.name || ''));
+
+	node.append('text')
+		.attr('class', 'subtitle')
+		.attr('text-anchor', 'middle')
+		.attr('dy', '1em')
+		.text(d => d.depth === 0 ? '' : (d.data.groupName || ''));
+
+	// Build legend
+	const legend = d3.select('#legend')
+		.selectAll('.legend-item')
+		.data(treeData.legend)
+		.enter()
+		.append('div')
+		.attr('class', 'legend-item');
+
+	legend.append('span')
+		.attr('class', 'legend-swatch')
+		.style('background', d => d.color || '#666');
+
+	legend.append('span').text(d => d.name);
+
+	// Collapsible behavior
+	node.on('click', function(event, d){
+		if (!d.children && !d._children) return;
+		if (d.children) { d._children = d.children; d.children = null; }
+		else { d.children = d._children; d._children = null; }
+		update();
+	});
+
+	function update(){
+		// Re-run layout
+		treeLayout(root);
+		g.selectAll('path.link').data(root.links()).attr('d', diagonal);
+		g.selectAll('g.node').data(root.descendants()).attr('transform', d => `translate(${d.y},${d.x})`);
+		fitToViewBox();
+	}
+	</script>
+</body>
+</html>
