@@ -1,0 +1,12 @@
+{
+  "name": "agentic-boardroom-ui",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "http-server -c-1 -p 8080",
+    "build": "mkdir -p dist && cp -r dashboard dist/ && cp -r dashboards dist/"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

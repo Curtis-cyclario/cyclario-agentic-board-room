@@ -84,6 +84,24 @@ class AgenticBoardroomServer {
       res.sendFile(path.join(__dirname, '../ui/dashboard/index.html'));
     });
 
+    // Dashboard hub
+    this.app.get('/dashboards', (req, res) => {
+      res.sendFile(path.join(__dirname, '../ui/dashboards/index.html'));
+    });
+
+    // Specific dashboards
+    this.app.get('/dashboards/:type', (req, res) => {
+      const file = path.join(
+        __dirname,
+        `../ui/dashboards/${req.params.type}.html`
+      );
+      res.sendFile(file, (err) => {
+        if (err) {
+          res.status(404).send('Dashboard not found');
+        }
+      });
+    });
+
     // Authentication routes
     this.setupAuthRoutes();
     
