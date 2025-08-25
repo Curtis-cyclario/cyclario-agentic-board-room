@@ -464,17 +464,18 @@ class AgentChatSystem extends EventEmitter {
 
   /**
    * Get all conversations for a user
-   */
+  */
   getUserConversations(userId, limit = 50, offset = 0) {
-    const userConversations = Array.from(this.conversations.values())
+    const allUserConversations = Array.from(this.conversations.values())
       .filter(conv => conv.userId === userId)
-      .sort((a, b) => b.lastActivity - a.lastActivity)
-      .slice(offset, offset + limit);
+      .sort((a, b) => b.lastActivity - a.lastActivity);
+
+    const paginatedConversations = allUserConversations.slice(offset, offset + limit);
 
     return {
       success: true,
-      conversations: userConversations.map(conv => this.sanitizeConversation(conv)),
-      total: userConversations.length
+      conversations: paginatedConversations.map(conv => this.sanitizeConversation(conv)),
+      total: allUserConversations.length
     };
   }
 
