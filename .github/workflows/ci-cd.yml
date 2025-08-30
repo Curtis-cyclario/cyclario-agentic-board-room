@@ -1,0 +1,449 @@
+name: 🚀 Agentic Boardroom CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop, 'feature/**', 'hotfix/**' ]
+  pull_request:
+    branches: [ main, develop ]
+  release:
+    types: [ published ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+env:
+  NODE_VERSION: '18'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # 🔍 Code Quality & Security
+  quality-gate:
+    name: 'Quality Gate'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🔍 Run Linting
+        run: npm run lint
+
+      - name: 📏 Check Code Formatting
+        run: npm run format -- --check
+
+      - name: 🔒 Security Audit
+        run: |
+          npm audit --audit-level high
+          npm run security:check
+
+      - name: 📊 Code Quality Analysis
+        uses: sonarsource/sonarqube-scan-action@v2
+        with:
+          args: >
+            -Dsonar.projectKey=agentic-boardroom
+            -Dsonar.sources=src/
+            -Dsonar.tests=tests/
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.exclusions=**/node_modules/**,**/*.test.js,**/*.spec.js
+
+      - name: 📈 Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+
+  # 🧪 Testing
+  test:
+    name: 'Test Suite'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: quality-gate
+
+    strategy:
+      matrix:
+        test-type: [unit, integration]
+
+    services:
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_pass
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🧪 Run ${{ matrix.test-type }} tests
+        run: npm run test:${{ matrix.test-type }}
+        env:
+          NODE_ENV: test
+          REDIS_URL: redis://localhost:6379
+          DATABASE_URL: postgresql://test_user:test_pass@localhost:5432/test_db
+
+      - name: 📊 Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-results-${{ matrix.test-type }}
+          path: |
+            coverage/
+            test-results/
+
+  # 🌐 End-to-End Testing
+  e2e:
+    name: 'E2E Tests'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: test
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 🚀 Start application
+        run: |
+          npm run build
+          npm start &
+          sleep 30
+
+      - name: 🖥️ Run E2E tests
+        run: npm run test:e2e
+        env:
+          BASE_URL: http://localhost:3000
+
+      - name: 📊 Upload E2E results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: e2e-results
+          path: |
+            cypress/screenshots/
+            cypress/videos/
+
+  # 🐳 Build & Push Docker Image
+  build:
+    name: 'Build & Push Docker Image'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [quality-gate, test, e2e]
+    if: github.event_name == 'push' || github.event_name == 'release'
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 🔐 Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📝 Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: 🏗️ Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_ENV=production
+            BUILD_COMMIT=${{ github.sha }}
+            BUILD_TIME=${{ github.event.head_commit.timestamp }}
+
+      - name: 🔍 Run container security scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: 📤 Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # 🚀 Deploy to Development
+  deploy-dev:
+    name: 'Deploy to Development'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: build
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+
+    environment:
+      name: development
+      url: https://dev.agentic-boardroom.com
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Deploy to Development
+        run: |
+          ./scripts/deploy.sh dev
+        env:
+          KUBECONFIG: ${{ secrets.KUBE_CONFIG_DEV }}
+          DOCKER_REGISTRY: ${{ env.REGISTRY }}
+          IMAGE_TAG: ${{ github.sha }}
+
+  # 🚀 Deploy to Staging
+  deploy-staging:
+    name: 'Deploy to Staging'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [build, deploy-dev]
+    if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/')) && github.event_name == 'push'
+
+    environment:
+      name: staging
+      url: https://staging.agentic-boardroom.com
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Deploy to Staging
+        run: |
+          ./scripts/deploy.sh staging
+        env:
+          KUBECONFIG: ${{ secrets.KUBE_CONFIG_STAGING }}
+          DOCKER_REGISTRY: ${{ env.REGISTRY }}
+          IMAGE_TAG: ${{ github.sha }}
+
+  # 🚀 Deploy to Production
+  deploy-prod:
+    name: 'Deploy to Production'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: deploy-staging
+    if: github.event_name == 'release' && github.event.action == 'published'
+
+    environment:
+      name: production
+      url: https://agentic-boardroom.com
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Deploy to Production
+        run: |
+          ./scripts/deploy.sh prod
+        env:
+          KUBECONFIG: ${{ secrets.KUBE_CONFIG_PROD }}
+          DOCKER_REGISTRY: ${{ env.REGISTRY }}
+          IMAGE_TAG: ${{ github.event.release.tag_name }}
+
+  # 📊 Performance Testing
+  performance:
+    name: 'Performance Testing'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: deploy-staging
+    if: (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/')) && github.event_name == 'push'
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🏃 Run Performance Tests
+        run: |
+          npm run benchmark
+        env:
+          TARGET_URL: https://staging.agentic-boardroom.com
+
+      - name: 📊 Upload Performance Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-results
+          path: |
+            performance-results/
+            benchmark-results.json
+
+  # 🔍 Final Security Audit
+  security-audit:
+    name: 'Security Audit'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: [quality-gate, build]
+    if: github.event_name == 'release'
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔒 Run Comprehensive Security Audit
+        run: |
+          # Run all security checks
+          npm run security:check
+
+          # OWASP ZAP Security Scan
+          docker run --rm -v $(pwd):/zap/wrk zaproxy/zap-stable zap-baseline.py \
+            -t https://staging.agentic-boardroom.com \
+            -g gen.conf \
+            -r zap-report.html
+
+          # Dependency vulnerability check
+          npm audit --audit-level moderate
+
+        env:
+          ZAP_API_KEY: ${{ secrets.ZAP_API_KEY }}
+
+      - name: 📤 Upload Security Reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            zap-report.html
+            security-scan-results/
+
+  # 📢 Notifications
+  notify:
+    name: 'Send Notifications'
+    runs-on: ubuntu-latest
+    needs: [deploy-dev, deploy-staging, deploy-prod, security-audit]
+    if: always()
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📢 Send Slack Notification
+        uses: 8398a7/action-slack@v3
+        if: always()
+        with:
+          status: ${{ job.status }}
+          channel: '#deployments'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
+      - name: 📧 Send Email Notification
+        if: failure() && github.event_name == 'release'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🚨 Deployment Failed: ${{ github.workflow }}',
+              body: `
+                **Workflow:** ${{ github.workflow }}
+                **Run:** ${{ github.run_id }}
+                **Branch:** ${{ github.ref_name }}
+                **Commit:** ${{ github.sha }}
+
+                Deployment failed. Please check the logs and investigate.
+              `,
+              labels: ['deployment-failed', 'urgent']
+            })
+
+  # 📚 Documentation
+  docs:
+    name: 'Update Documentation'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: deploy-prod
+    if: github.event_name == 'release'
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📚 Generate Documentation
+        run: |
+          npm run docs
+          npm run build:docs
+
+      - name: 🚀 Deploy Documentation
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          cname: docs.agentic-boardroom.com
+
